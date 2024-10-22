@@ -20,9 +20,7 @@ Provides the complete code for the entire workflow, including data preparation, 
 
 ---
 
-### Installation
-
-Step-by-step instructions on how to install and run your project locally.
+## Installation
 
 ```bash
 # Clone this repository
@@ -37,7 +35,7 @@ $ pip install -r requirements.txt
 
 ---
 
-### Data preparation
+## Data preparation
 
 [CMA Tropical Cyclone Best Track Dataset](https://tcdata.typhoon.org.cn/en/zjljsjj.html)
 
@@ -60,7 +58,7 @@ Additionally, two columns, `distance_km` and `bearing`, have been added to repre
 
 ---
 
-### Feature selection
+## Feature selection
 
 Convert `Time` into hour, day, month, and year cycles.
 
@@ -70,7 +68,7 @@ The `I` and `END` columns are transformed using one-hot encoding, while the rema
 
 ---
 
-### Model training
+## Model training
 
 Use `python3 train.py` to train the model.
 
@@ -82,7 +80,7 @@ The first 90% of the data is used as training data, and the remaining 10% is use
 
 ---
 
-### Prediction
+## Prediction
 
 Use `python3 predict.py` to test the model. 
 
@@ -94,6 +92,6 @@ A comparison plot between the predicted and actual data will be generated.
 
 ---
 
-### License
+## License
 
 This project is licensed under the MIT License.
