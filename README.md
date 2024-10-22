@@ -122,4 +122,4 @@ Example plot:
 
 ## License
 
-This project is licensed under the **MIT License**.
+This project is licensed under the **MIT License**. See the [LICENSE](https://github.com/veraleiwengian/Typhoon-Path-Prediction/blob/main/LICENSE) file for details.
