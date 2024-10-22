@@ -6,9 +6,9 @@
 
 - [Overview](#overview)
 - [Installation](#installation)
-- [Data preparation](#data-preparation)
-- [Feature selection](#feature-selection)
-- [Model training](#model-training)
+- [Data Preparation](#data-preparation)
+- [Feature Selection](#feature-selection)
+- [Model Training](#model-training)
 - [Prediction](#prediction)
 - [License](#license)
 
@@ -16,82 +16,110 @@
 
 ## Overview
 
-Provides the complete code for the entire workflow, including data preparation, feature extraction, model training, prediction, and visualization of the results. The model uses typhoon data from the previous 4 time points to predict the typhoon data for the next time point.
+This project provides a complete workflow for predicting typhoon paths using an LSTM-based model. The model predicts the typhoon's path by using data from the previous 4 time points to forecast the next time point. The workflow includes data preparation, feature extraction, model training, prediction, and visualization of results.
 
 ---
 
 ## Installation
 
-```bash
-# Clone this repository
-$ git clone https://github.com/veraleiwengian/typhoon-path-prediction.git
+### Prerequisites:
+- Python 3.x
+- `pip` package manager
 
-# Go into the repository
-$ cd typhoon-path-prediction
+### Steps:
 
-# Install dependencies
-$ pip install -r requirements.txt
-```
+1. **Clone this repository:**
+   ```bash
+   git clone https://github.com/veraleiwengian/typhoon-path-prediction.git
+   ```
+
+2. **Navigate into the repository:**
+   ```bash
+   cd typhoon-path-prediction
+   ```
+
+3. **Install dependencies:**
+   ```bash
+   pip install -r requirements.txt
+   ```
 
 ---
 
 ## Data preparation
 
-[CMA Tropical Cyclone Best Track Dataset](https://tcdata.typhoon.org.cn/en/zjljsjj.html)
+We use the [CMA Tropical Cyclone Best Track Dataset](https://tcdata.typhoon.org.cn/en/zjljsjj.html).
 
+To clean and prepare the dataset, run:
+   ```bash
+   python3 data_clean.py
+   ```
 
-Use `$python3 data_clean.py` to clean the dataset.
+**Modifications:**
 
-The differences from the original dataset include the addition of an `END` column to record the end of the tropical cyclone:
-
-0 indicates not ended, 
-
-1 indicates dissipation, 
-
-2 indicates movement out of the Western Pacific Typhoon Committee’s responsibility area, 
-
-3 indicates merging, 
-
-4 indicates quasi-stationary. 
-
-Additionally, two columns, `distance_km` and `bearing`, have been added to represent the Haversine distance and bearing angle for the typhoon’s movement from the previous time point to the current time point.
+- `END` column: Records the status of the tropical cyclone at the current time point:
+    - 0: Not ended
+    - 1: Dissipated
+    - 2: Moved out of the Western Pacific Typhoon Committee’s responsibility area
+    - 3: Merged
+    - 4: Quasi-stationary
+- `distance_km` and `bearing` columns: These represent the Haversine distance and bearing angle from the previous time point to the current time point, providing more spatial information about the cyclone’s movement.
 
 ---
 
 ## Feature selection
 
-Convert `Time` into hour, day, month, and year cycles.
+We enhance the model’s feature representation with the following techniques:
 
-The above features, as well as the bearing, are captured using sine and cosine transformations to account for more complex non-linear relationships.
+- **Temporal Features**: Convert the Time column into cyclical representations (hour, day, month, year) using sine and cosine transformations to capture time-based cyclical patterns.
 
-The `I` and `END` columns are transformed using one-hot encoding, while the remaining columns are normalized using min-max normalization.
+- **Bearing**: The bearing angle is also transformed using sine and cosine to better capture angular relationships.
+
+- **Categorical Features**:
+    - I (Intensity) and END (Status) are one-hot encoded to allow the model to differentiate between different categories.
+
+- **Normalization**:
+    - Remaining numerical columns are normalized using min-max scaling to standardize the data and improve model training efficiency.
 
 ---
 
 ## Model training
 
-Use `python3 train.py` to train the model.
+To train the model:
+   ```bash
+   python3 train.py
+   ```
 
-The criterion used is SmoothL1Loss, which is more robust to outliers than MSELoss, 
 
-and the optimizer is AdamW, which combines the benefits of Adam with weight decay for better generalization. 
+**Training Details**:
 
-The first 90% of the data is used as training data, and the remaining 10% is used for validation. The best model is saved based on the validation loss.
+- **Loss function**: SmoothL1Loss (Huber Loss), chosen for its robustness against outliers, balancing between L1 and L2 loss.
+
+- **Optimizer**: AdamW, which combines the benefits of Adam (adaptive learning rates) with weight decay to prevent overfitting and improve generalization.
+
+- **Data split**:
+    - 90% of the dataset is used for training.
+    - 10% is reserved for validation.
+
+- The best model is automatically saved based on the validation loss.
 
 ---
 
 ## Prediction
 
-Use `python3 predict.py` to test the model. 
+To make predictions:
+   ```bash
+   python3 predict.py
+   ```
 
-You can specify a typhoonID, and based on the dataset, the model will input the data from the previous 4 time points to predict the next time point. 
+- You can specify a typhoonID to run predictions.
+- The model uses the previous 4 time points of data to predict the next time point’s typhoon data.
+- After prediction, a plot comparing the actual vs. predicted data is generated.
 
-A comparison plot between the predicted and actual data will be generated.
-
+Example plot:
 ![comparison plot](./result/plot_20230019_11.jpg)
 
 ---
 
 ## License
 
-This project is licensed under the MIT License.
+This project is licensed under the **MIT License**.
