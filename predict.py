@@ -3,7 +3,7 @@ from data_loader import TyphoonDataset
 from model import TropicalCycloneLSTM
 from torch.utils.data import DataLoader
 import torch
-from draw_map import draw_two_map
+from draw_map import draw_two_map, make_two_map_gif
 import numpy as np
 from share_func import normalize_df, denormalize, calculate_new_position, restore_bearing
 import argparse
@@ -16,8 +16,9 @@ def parse_args():
     parser.add_argument('--device', type=str, choices=['cpu', 'cuda', 'mps'], default='mps', help='Device to use for training (cpu, cuda, mps)')
     parser.add_argument('--hidden_size', type=int, default=512, help='Number of hidden units in LSTM')
     parser.add_argument('--num_layers', type=int, default=3, help='Number of LSTM layers')
-    parser.add_argument('--test_typhoonID', type=int, default=20230019, help='Learning rate for optimizer')
+    parser.add_argument('--test_typhoonID', type=int, default=20230010, help='Learning rate for optimizer')
     parser.add_argument('--checkpoint', type=str, default='checkpoints/best_model_epoch53_loss0.0185.pth', help='Path to model checkpoint (e.g., checkpoints/best_model.pth)')
+    parser.add_argument('--result_type', type=str, choices=['gif', 'jpg', 'both'], default='gif', help="Specify the output file type. Choose 'gif' for an animated GIF, 'jpg' for a static JPEG image, or 'both' to generate both formats.")
     return parser.parse_args()
 
 
@@ -86,6 +87,8 @@ if __name__ == '__main__':
     # Make predictions
     predictions, actuals = predict(model, test_dataloader, device)
     
+    all_actual_df = pd.DataFrame()
+    all_predict_df = pd.DataFrame()
 
     for i, pred in enumerate(predictions):
         # Assign each predicted value to the corresponding variable
@@ -132,8 +135,10 @@ if __name__ == '__main__':
         p_end = i_class_mapping[end_class_index]
 
         # Create actual and predicted DataFrames
-        actual_df = test_df[i:i+5].copy()
-        predict_df = test_df[i:i+4].copy()
+        #actual_df = test_df[i:i+5].copy()
+        #predict_df = test_df[i:i+4].copy()
+        actual_df = test_df[:i+5].copy()
+        predict_df = test_df[:i+4].copy()
 
         # Calculate new latitude and longitude
         p_lat, p_long = calculate_new_position(predict_df.iloc[-1]['LAT'], predict_df.iloc[-1]['LONG'], p_bear, p_dis)
@@ -143,7 +148,23 @@ if __name__ == '__main__':
         predict_df.loc[len(predict_df)] = [p_time, p_i, p_lat, p_long, p_pres, p_wnd, p_owd, p_end, p_dis, p_bear]
         print('Predicted:', p_time, p_i, p_lat, p_long, p_pres, p_wnd, p_owd, p_end, p_dis, p_bear)
         print('Actual:', test_df.iloc[i+4])
-        
-        # Draw comparison of actual vs predicted paths
-        draw_two_map(actual_df, predict_df, args.test_typhoonID, i)
 
+        predict_df['LAT'] = predict_df['LAT'] / 10
+        predict_df['LONG'] = predict_df['LONG'] / 10
+
+        actual_df['LAT'] = actual_df['LAT'] / 10
+        actual_df['LONG'] = actual_df['LONG'] / 10
+        
+        if args.result_type in ['jpg', 'both']:
+            # Draw comparison of actual vs predicted paths
+            draw_two_map(actual_df, predict_df, args.test_typhoonID, i)
+
+        actual_df['index'] = [i] * len(actual_df)
+        predict_df['index'] = [i] * len(predict_df)
+
+
+        all_actual_df = pd.concat([all_actual_df, actual_df], ignore_index=True)
+        all_predict_df = pd.concat([all_predict_df, predict_df], ignore_index=True)
+
+    if args.result_type in ['gif', 'both']:
+        make_two_map_gif(all_actual_df, all_predict_df, args.test_typhoonID)

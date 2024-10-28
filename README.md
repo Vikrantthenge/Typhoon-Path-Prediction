@@ -2,6 +2,8 @@
 
 > A Typhoon Path Prediction Model Implemented Using LSTM
 
+![comparison plot](./result/animation_20230010.gif)
+
 ## Table of Contents
 
 - [Overview](#overview)
@@ -113,10 +115,7 @@ To make predictions:
 
 - You can specify a typhoonID to run predictions.
 - The model uses the previous 4 time points of data to predict the next time point’s typhoon data.
-- After prediction, a plot comparing the actual vs. predicted data is generated.
-
-Example plot:
-![comparison plot](./result/plot_20230019_11.jpg)
+- After prediction, a GIF comparing the actual and predicted data is generated.
 
 ---
 
